@@ -1,6 +1,25 @@
 import { createSecureHeaders } from 'next-secure-headers';
 
 /** @type {import('next').NextConfig} */
+const DEFAULT_API_BASE_URL = 'https://api.tournax.example.com';
+
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+
+const connectSrc = new Set(["'self'"]);
+
+try {
+  const apiUrl = new URL(apiBaseUrl);
+  connectSrc.add(apiUrl.origin);
+
+  const normalizedHref = apiUrl.href.replace(/\/$/, '');
+  if (normalizedHref !== apiUrl.origin) {
+    connectSrc.add(normalizedHref);
+  }
+} catch (error) {
+  const reason = error instanceof Error ? error.message : String(error);
+  throw new Error(`Invalid NEXT_PUBLIC_API_BASE_URL for CSP: ${reason}`);
+}
+
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
@@ -17,7 +36,7 @@ const nextConfig = {
             scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             imgSrc: ["'self'", 'data:'],
-            connectSrc: ["'self'"],
+            connectSrc: Array.from(connectSrc),
             fontSrc: ["'self'"],
             frameSrc: ["'none'"],
             baseUri: ["'self'"],
