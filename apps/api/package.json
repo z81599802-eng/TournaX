@@ -1,0 +1,55 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/server.js",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --config ../../packages/config/eslint/node.cjs",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed"
+  },
+  "dependencies": {
+    "@prisma/client": "5.8.1",
+    "bcrypt": "5.1.1",
+    "cookie-parser": "1.4.6",
+    "cors": "2.8.5",
+    "csurf": "1.11.0",
+    "dotenv-flow": "4.1.0",
+    "express": "4.18.2",
+    "express-rate-limit": "7.1.5",
+    "helmet": "7.1.0",
+    "hsts": "2.2.0",
+    "joi": "17.12.0",
+    "jsonwebtoken": "9.0.2",
+    "pino": "8.17.0"
+  },
+  "devDependencies": {
+    "@tournax/config": "workspace:*",
+    "@types/bcrypt": "5.0.2",
+    "@types/cookie-parser": "1.4.6",
+    "@types/csurf": "1.11.2",
+    "@types/express": "4.17.21",
+    "@types/jsonwebtoken": "9.0.2",
+    "@types/node": "20.11.5",
+    "@types/supertest": "2.0.12",
+    "eslint": "8.56.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-promise": "6.1.1",
+    "eslint-plugin-security": "1.7.1",
+    "eslint-plugin-unicorn": "50.0.1",
+    "pino-pretty": "10.2.0",
+    "prisma": "5.8.1",
+    "supertest": "6.3.3",
+    "tsx": "4.7.0",
+    "typescript": "5.3.3",
+    "vitest": "1.2.2"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
