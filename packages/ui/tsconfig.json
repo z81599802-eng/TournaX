@@ -1,0 +1,12 @@
+{
+  "extends": "@tournax/config/tsconfig/next.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "paths": {
+      "@tournax/ui": ["./src"]
+    }
+  },
+  "include": ["src", "vitest.config.ts", "vitest.setup.ts"],
+  "exclude": ["dist"]
+}

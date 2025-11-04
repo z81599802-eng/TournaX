@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLAYER
+  HOST
+  ADMIN
+}
+
+enum TournamentMode {
+  SOLO
+  DUO
+  SQUAD
+}
+
+enum TournamentStatus {
+  DRAFT
+  OPEN
+  RUNNING
+  FINISHED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(PLAYER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tournaments   Tournament[] @relation("UserTournaments")
+  registrations Registration[]
+}
+
+model Game {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  logoUrl   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tournaments Tournament[]
+}
+
+model Tournament {
+  id           String            @id @default(cuid())
+  hostId       String
+  gameId       String
+  name         String
+  description  String
+  mode         TournamentMode
+  prizeMoney   Int               @default(0)
+  regOpensAt   DateTime
+  regClosesAt  DateTime
+  matchAt      DateTime
+  hasFee       Boolean           @default(false)
+  fee          Int               @default(0)
+  status       TournamentStatus  @default(DRAFT)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  host         User   @relation("UserTournaments", fields: [hostId], references: [id])
+  game         Game   @relation(fields: [gameId], references: [id])
+  registrations Registration[]
+  result        Result?
+
+  @@index([gameId])
+  @@index([status])
+  @@index([prizeMoney])
+  @@index([mode])
+  @@index([name])
+}
+
+model Registration {
+  id           String   @id @default(cuid())
+  tournamentId String
+  userId       String
+  gameUid      String
+  teamName     String?
+  createdAt    DateTime @default(now())
+
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([tournamentId, gameUid])
+  @@index([userId])
+}
+
+model Result {
+  id                   String   @id @default(cuid())
+  tournamentId         String   @unique
+  championUserId       String
+  runnerUpUserId       String
+  secondRunnerUpUserId String
+  killsJson            Json?
+
+  tournament           Tournament @relation(fields: [tournamentId], references: [id])
+}

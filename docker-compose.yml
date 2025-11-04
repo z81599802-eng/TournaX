@@ -1,0 +1,70 @@
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.1
+    container_name: tournax-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tournax
+      MYSQL_USER: tournax_app
+      MYSQL_PASSWORD: change-me-please
+      MYSQL_ROOT_PASSWORD: change-me-root
+    command: --default-authentication-plugin=caching_sha2_password --mysql-native-password=ON
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost']
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: tournax-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      retries: 5
+
+  api:
+    build:
+      context: .
+    # Use target-specific dockerfile located in apps/api
+      dockerfile: apps/api/Dockerfile
+    container_name: tournax-api
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - apps/api/.env.example
+    environment:
+      DATABASE_URL: mysql://tournax_app:change-me-please@mysql:3306/tournax
+      NODE_ENV: development
+      PORT: 4000
+      JWT_SECRET: local-development-secret-please-override-64chars________________________________
+    ports:
+      - '4000:4000'
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: tournax-web
+    depends_on:
+      api:
+        condition: service_started
+    env_file:
+      - apps/web/.env.example
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/api
+      NEXT_PUBLIC_WEB_BASE_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+
+volumes:
+  mysql-data:
